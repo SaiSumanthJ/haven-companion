@@ -1,5 +1,5 @@
 import { totalmem } from "node:os";
-import { recommendOffers } from "./modelOffers.ts";
+import { loadCatalog, recommendCatalog } from "./libraryCatalog.ts";
 import {
   comfortHeadroomBytes,
   pickComfortableModel,
@@ -19,13 +19,14 @@ function line(text = ""): void {
 
 const ram = totalmem();
 const headroom = comfortHeadroomBytes(ram);
-const { recommended, alternatives } = recommendOffers(ram);
+const catalog = await loadCatalog();
+const { recommended, alternatives } = recommendCatalog(catalog, ram);
 const nodeMajor = Number(process.versions.node.split(".")[0]);
 
 line("Haven setup");
-line("This check is for your computer only. Nothing is uploaded.");
+line("This check runs on your computer. Nothing is uploaded.");
 line();
-line(`1. Memory on this computer: ${gb(ram)}`);
+line(`1. Memory on your computer: ${gb(ram)}`);
 line(`   Haven keeps about ${gb(headroom)} free for the system, the browser, Voice, and Call.`);
 line(`   A local model may use up to ${gb(Math.max(0, ram - headroom))} on disk and in RAM.`);
 line();
@@ -39,15 +40,23 @@ if (nodeMajor < 20) {
 }
 line(`2. Node.js ${process.versions.node} — new enough.`);
 line();
+line(
+  catalog.source === "live"
+    ? `   Model list: live from ollama.com (${catalog.offers.length} companion tags).`
+    : catalog.source === "cache"
+      ? `   Model list: last library check ${catalog.checkedAt}.`
+      : "   Model list: built-in fallback (ollama.com could not be reached).",
+);
+line();
 
 if (!recommended) {
-  line("3. This computer does not have enough RAM for a local chat model.");
+  line("3. Your computer does not have enough RAM for a local chat model.");
   line("   Haven can still open in demo mode (your words save; replies are placeholders).");
   line("   A real companion needs about 8 GB of RAM or more.");
   process.exit(1);
 }
 
-line("3. Download one local model with Ollama (this stays on your computer).");
+line("3. Download one local model with Ollama (it stays on your computer).");
 line(`   Recommended: ${recommended.label}  (~${gb(recommended.sizeBytes)})`);
 line(`   ${recommended.note}`);
 line();
@@ -56,7 +65,7 @@ line();
 line(`   ollama pull ${recommended.pull}`);
 line();
 if (alternatives.length) {
-  line("   Other models that also fit:");
+  line("   Other models that also fit your computer:");
   for (const offer of alternatives) {
     line(`   - ${offer.label} (~${gb(offer.sizeBytes)}): ollama pull ${offer.pull}`);
     line(`     ${offer.note}`);
@@ -64,13 +73,12 @@ if (alternatives.length) {
   line();
 }
 line("   You need that much free disk space as well as RAM.");
-line("   Ollama download page: https://ollama.com/download");
-line("   Model library: https://ollama.com/library");
+line("   Ollama: https://ollama.com/download");
+line("   Later, run npm run review-models to check the library again.");
 line();
 
 const controller = new AbortController();
 const timer = setTimeout(() => controller.abort(), 2500);
-let installed: ListedOllamaModel[] = [];
 try {
   const response = await fetch(`${host}/api/tags`, { signal: controller.signal });
   clearTimeout(timer);
@@ -83,7 +91,7 @@ try {
       capabilities?: string[];
     }>;
   };
-  installed = (payload.models ?? []).map((entry) => ({
+  const installed: ListedOllamaModel[] = (payload.models ?? []).map((entry) => ({
     name: entry.name ?? "",
     size: entry.size ?? 0,
     parameterSize: entry.details?.parameter_size ?? "",
@@ -98,11 +106,12 @@ try {
     line("5. Start the site from this folder:");
     line("   npm install");
     line("   npm run dev");
-    line("   Then open http://127.0.0.1:3000");
+    line("   Then open the Local address printed in that terminal.");
+    line("   That is usually http://127.0.0.1:3000 on your computer.");
+    line("   If 3000 is busy, the terminal prints 3001 or 3002 — use that.");
     line("   Keep this terminal and Ollama open while you use Haven.");
-    line("   The first Voice or Call also downloads Whisper and Kokoro into the .haven folder in this project. That stays on this computer.");
   } else {
-    line("   Ollama is open, but no installed chat model fits this computer yet.");
+    line("   Ollama is open, but no installed chat model fits your computer yet.");
     line(`   Run: ollama pull ${recommended.pull}`);
     line("   When that finishes, run npm run setup again.");
   }
@@ -117,5 +126,5 @@ try {
   line("5. After the model is installed:");
   line("   npm install");
   line("   npm run dev");
-  line("   Open http://127.0.0.1:3000");
+  line("   Open the Local address the terminal prints (usually http://127.0.0.1:3000).");
 }

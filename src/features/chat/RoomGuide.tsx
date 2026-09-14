@@ -9,7 +9,7 @@ type RoomGuideProps = {
 };
 
 const LINES = [
-  ["This room", "Haven is AI, not a person, and not therapy. Memory stays on this device. Nothing here asks you to stay."],
+  ["This room", "Haven is AI, not a person, and not therapy. Memory stays on your computer. Nothing here asks you to stay."],
   ["Menu", "Rooms, the name, how they know you, voice, saved facts, and This device."],
   ["Write", "Enter sends. Shift+Enter is a new line. Edit a You line to restart from there."],
   ["Attach", "Pictures, documents, or a short clip. Read on this computer. Up to three files."],

@@ -2,7 +2,7 @@
 
 A private AI companion that runs on **your** computer. 18+ only.
 
-This is software, not a person, and not therapy. Talk stays on this device. Haven does not put a copy of your chats on someone else’s server.
+This is software, not a person, and not therapy. Talk stays on **your computer** — the machine where you install Haven. It does not put a copy of your chats on someone else’s server.
 
 There is no phone app and no “download an APK.” You install two free programs, download one local model that **fits your RAM**, then open Haven in a browser on the same computer.
 
@@ -21,7 +21,7 @@ There is no phone app and no “download an APK.” You install two free program
 
 **8 GB RAM** works only with a small model, and other apps should be closed. **16 GB** is the comfortable laptop size. **32 GB** or **64 GB** can run a much stronger companion.
 
-Haven will **not** start a model that is too large for this computer. That is deliberate. A model that does not fit will freeze the machine. If nothing fitting is installed, the site still opens in demo mode so your words are saved; replies are placeholders until you install a fitting model.
+Haven will **not** start a model that is too large for your computer. That is deliberate. A model that does not fit will freeze the machine. If nothing fitting is installed, the site still opens in demo mode so your words are saved; replies are placeholders until you install a fitting model.
 
 ---
 
@@ -110,12 +110,21 @@ npm run setup
 
 Read the whole printout. It will:
 
-1. Measure RAM on **this** computer.
-2. Name one recommended model that fits, plus one or two smaller backups.
-3. Give you a single `ollama pull …` command to copy.
-4. Tell you if Ollama is open, and if a fitting model is already installed.
+1. Measure RAM on **your** computer.
+2. Read Ollama’s current public library (so a copy you download years later still sees new tags).
+3. Name one recommended model that fits, plus one or two smaller backups.
+4. Give you a single `ollama pull …` command to copy.
+5. Tell you if Ollama is open, and if a fitting model is already installed.
 
 **Do not skip this.** Do not download a huge model “to be safe.” A 27B model on an 8 GB or 16 GB laptop will not run well and Haven will refuse it.
+
+Any time later, in this same folder:
+
+```bash
+npm run review-models
+```
+
+That repeats the library check. You do not need a new Haven download for new Ollama tags.
 
 ---
 
@@ -135,7 +144,7 @@ ollama pull gemma4:26b
 
 Only run **one**. The download is several gigabytes. Leave the window open until it says the pull is complete.
 
-Typical fit (Haven also measures *your* RAM; trust `npm run setup` over this table if they differ):
+Typical fit (trust `npm run setup` or `npm run review-models` over this table — those read today’s library sizes):
 
 | RAM on this computer | Use this first | Also fine | Do not pull |
 |---|---|---|---|
@@ -167,11 +176,11 @@ Ollama must still be open.
 npm run dev
 ```
 
-Leave that terminal running. Open a browser to:
+Leave that terminal running. It will print a line like:
 
-**http://127.0.0.1:3000**
+`Local: http://127.0.0.1:3000`
 
-That address is this computer only. Other people on the internet cannot open your Haven.
+Open **that** address in a browser on the **same** computer. `127.0.0.1` means “this machine,” not a site on the public internet. Port **3000** is the usual port Haven asks for. If something else is already using 3000, the terminal prints `3001` or `3002` instead — use the number it printed. Other people on the internet cannot open your Haven.
 
 1. Confirm you are 18+.
 2. Name the companion.
@@ -192,7 +201,7 @@ To stop: press `Ctrl+C` in the terminal. Start again later with `npm run dev` (O
 | `ollama` is not found | Install from [ollama.com/download](https://ollama.com/download), then open a new terminal |
 | `npm run setup` says Ollama is not running | Open the Ollama app and leave it running |
 | The page says **Demo replies only** | No fitting model is installed. Run `npm run setup`, `ollama pull` the named model, keep Ollama open, refresh the page |
-| The site will not open | In the Haven folder run `npm run dev`. Use **http://127.0.0.1:3000**, not a random other port |
+| The site will not open | In the Haven folder run `npm run dev`. Open the **Local:** address the terminal prints (usually http://127.0.0.1:3000) |
 | The computer crawls after you pull a model | That model is too large. In a terminal: `ollama rm NAME`, then `npm run setup` and pull the smaller recommended one |
 | First reply takes a long time | Normal on the first wake. Wait. Do not pull a bigger model to “speed it up” |
 | Voice or Call fails the first time | Wait for the one-time Whisper/Kokoro download. Stay on this computer; do not close the terminal |
@@ -203,11 +212,11 @@ You do **not** need an API key. You do **not** need to pay a model host. Optiona
 
 ---
 
-## What stays on this computer
+## What stays on your computer
 
 - The Ollama model
 - Whisper and Kokoro (after the first Voice/Call)
-- Saved facts and rooms (in this browser)
+- Saved facts and rooms (in the browser on that computer)
 - Files you attach
 
 Export and import memory from **Menu → This device** if you want a file copy.
