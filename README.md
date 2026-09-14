@@ -66,7 +66,7 @@ If that fails, Ollama is not installed or not on PATH. Install again from the li
 **Option A — Git** (if you already use it):
 
 ```bash
-git clone PASTE_THE_HTTPS_ADDRESS_FROM_THE_GREEN_CODE_BUTTON
+git clone https://github.com/SaiSumanthJ/haven-companion.git
 cd haven-companion
 ```
 
