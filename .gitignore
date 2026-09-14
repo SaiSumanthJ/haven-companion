@@ -1,3 +1,11 @@
+# Builder maps stay on the working machine. They are not the product.
+/docs/
+/AGENTS.md
+/CLAUDE.md
+/.cursor/
+/scripts/*-eval.ts
+/scripts/self-eval.mjs
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -12,6 +20,9 @@
 
 # testing
 /coverage
+
+# local Whisper + Kokoro weights (downloaded once per machine)
+.haven/
 
 # next.js
 /.next/
@@ -32,6 +43,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
