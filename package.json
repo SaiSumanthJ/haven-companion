@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "setup": "node --experimental-strip-types scripts/setup.ts",
-    "eval": "node scripts/self-eval.mjs"
+    "eval": "node scripts/eval.mjs"
   },
   "engines": {
     "node": ">=20.9.0"
