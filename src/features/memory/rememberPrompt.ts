@@ -14,6 +14,7 @@ export function buildRememberPrompt(input: {
   return [
     "You write durable memory for Haven. Return ONLY JSON: {\"facts\":[\"...\"],\"summary\":\"...\"}",
     "facts: max 8 short strings, ONLY from Latest lines, about the user's lasting life.",
+    "Never write Name: unless they clearly said their name. Never use filler words as names.",
     "Skip greetings, one-off moods, erotic blow-by-blow, and anything sexual involving a minor.",
     "Do not repeat facts already known.",
     "summary: one reconstruction brief of THIS ROOM. One rule for every room and every setup.",

@@ -7,6 +7,7 @@ import { pairTurns } from "@/features/chat/pairTurns";
 import { UserPrompt } from "@/features/chat/UserPrompt";
 import { useStickToBottom } from "@/features/chat/useStickToBottom";
 import { CrisisCard } from "@/features/safety/CrisisCard";
+import type { SuggestionGroup } from "@/features/memory/suggestions";
 import type { MemoryTurn } from "@/features/memory/types";
 import { stripLeakedCallLabel } from "@/features/memory/turnPace";
 
@@ -16,7 +17,8 @@ type ChatThreadProps = {
   liveReply: string;
   crisisText: string | null;
   pendingLabel: string;
-  suggestions: string[];
+  recentSuggestions: SuggestionGroup[];
+  pastSuggestions: SuggestionGroup[];
   onAddSuggestion: (fact: string) => void;
   onRestartPrompt: (turnId: string, text: string) => void;
   careNote?: string | null;
@@ -28,7 +30,8 @@ export function ChatThread({
   liveReply,
   crisisText,
   pendingLabel,
-  suggestions,
+  recentSuggestions,
+  pastSuggestions,
   onAddSuggestion,
   onRestartPrompt,
   careNote,
@@ -52,8 +55,10 @@ export function ChatThread({
           const last = index === pairs.length - 1;
           const lastTurn = pair.turns[pair.turns.length - 1];
           const attachLive = last && liveFresh && lastTurn.role === "user";
+          const n = pair.turns.find((turn) => turn.role === "user")?.n;
           return (
             <section key={pair.id} className="haven-pair">
+              {n != null ? <p className="haven-talk-n">{n}</p> : null}
               {pair.turns.map((turn) =>
                 turn.role === "user" ? (
                   <UserPrompt
@@ -69,7 +74,11 @@ export function ChatThread({
               )}
               {attachLive ? <ReplyTurn text={liveReply} live /> : null}
               {last && lastTurn.id === lastAssistant?.id && !pending ? (
-                <FactSuggest facts={suggestions} onAdd={onAddSuggestion} />
+                <FactSuggest
+                  recent={recentSuggestions}
+                  past={pastSuggestions}
+                  onAdd={onAddSuggestion}
+                />
               ) : null}
               {last && pending && !liveReply ? (
                 <p className="text-sm text-[var(--haven-mute)]">{pendingLabel}</p>

@@ -2,8 +2,13 @@ import type { AttachBundle } from "@/features/attach/types";
 import { companionTurn, openingTurn } from "@/features/chat/companionTurn";
 import { takeSpokenSentences } from "@/features/voice/callSpeech";
 import { activeTurns, appendTurn, upsertFromSnapshot } from "@/features/memory/chats";
-import { extractHeuristicFacts, stackSuggestions, unseenFacts } from "@/features/memory/extractFacts";
+import { extractHeuristicFacts, unseenFacts } from "@/features/memory/extractFacts";
 import { harvestMemory } from "@/features/memory/remember";
+import {
+  dropExchangeSuggestions,
+  lastUserTurnId,
+  pushSuggestions,
+} from "@/features/memory/suggestions";
 import { loadState } from "@/features/memory/store";
 import type { HavenState } from "@/features/memory/types";
 import { CALL_SENTENCE_CAP, type ModelHealth, type TalkPace } from "@/ports/model";
@@ -13,7 +18,6 @@ type TalkApi = {
   setLiveReply: (value: string | ((current: string) => string)) => void;
   setCrisisText: (value: string | null) => void;
   setPending: (value: boolean) => void;
-  setSuggestions: (facts: string[] | ((current: string[]) => string[])) => void;
 };
 
 function keep(commit: TalkApi["commit"], snapshot: HavenState) {
@@ -80,11 +84,11 @@ export async function sendLine(
   options?: SendLineOptions,
 ): Promise<string | null> {
   const hints = unseenFacts(state.knownFacts, extractHeuristicFacts(text));
-  api.setSuggestions((older) => stackSuggestions(state.knownFacts, hints, older));
   api.setPending(true);
   let saved: HavenState | null = null;
   let blocked = false;
   let spoken: string | null = null;
+  let tagged = false;
   const spokenOut = feedSpoken(options?.onSpoken);
   try {
     const result = await companionTurn({
@@ -93,7 +97,14 @@ export async function sendLine(
       persistUser: true,
       pace: options?.pace,
       attach: options?.attach,
-      onUserSaved: (next) => keep(api.commit, next),
+      onUserSaved: (next) => {
+        keep(api.commit, next);
+        if (tagged || !hints.length) return;
+        const id = lastUserTurnId(loadState());
+        if (!id) return;
+        api.commit(pushSuggestions(loadState(), id, hints));
+        tagged = true;
+      },
       onDelta: (chunk) => {
         api.setLiveReply((current) => current + chunk);
         if (options?.onSpoken) void spokenOut.push(chunk);
@@ -113,7 +124,10 @@ export async function sendLine(
         /* Ending the call stops the voice, not the saved reply. */
       }
     }
-    if (blocked) api.setSuggestions([]);
+    if (blocked && saved) {
+      const id = lastUserTurnId(saved);
+      if (id) api.commit(dropExchangeSuggestions(saved, id));
+    }
   } catch {
     const latest = loadState();
     const already = lastAssistant(latest);
@@ -132,9 +146,11 @@ export async function sendLine(
   if (saved && !blocked && health?.adapter !== "mock") {
     void harvestMemory(saved)
       .then((harvested) => {
-        api.commit(harvested.next);
-        api.setSuggestions((older) =>
-          stackSuggestions(harvested.next.knownFacts, [...hints, ...harvested.suggestions], older),
+        const id = lastUserTurnId(harvested.next);
+        api.commit(
+          id
+            ? pushSuggestions(harvested.next, id, [...hints, ...harvested.suggestions])
+            : harvested.next,
         );
       })
       .catch(() => undefined);

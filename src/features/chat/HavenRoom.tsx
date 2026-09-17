@@ -53,7 +53,8 @@ export function HavenRoom({ session }: HavenRoomProps) {
         pending={session.pending}
         liveReply={session.liveReply}
         crisisText={session.crisisText}
-        suggestions={session.suggestions}
+        recentSuggestions={session.recentSuggestions}
+        pastSuggestions={session.pastSuggestions}
         onAddSuggestion={session.addSuggestion}
         onRestartPrompt={session.restartFrom}
         pendingLabel={waking ? "Waking the local model…" : "Answering…"}

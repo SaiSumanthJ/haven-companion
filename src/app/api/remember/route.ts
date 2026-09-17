@@ -1,4 +1,4 @@
-import { parseRememberPayload } from "@/features/memory/extractFacts";
+import { parseRememberPayload } from "@/features/memory/extractParse";
 import { buildRememberPrompt } from "@/features/memory/rememberPrompt";
 import { ROOM_SUMMARY_TURNS } from "@/features/memory/types";
 import { resolveModel } from "@/ports/model";

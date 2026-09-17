@@ -59,9 +59,8 @@ export async function POST(request: Request) {
     buildSystemPrompt({
       companionName: body.companionName?.trim() || "Ash",
       adultMode: Boolean(body.adultMode),
-      knownFacts: pace === "call" ? facts.slice(-24) : facts,
-      roomSummary:
-        pace === "call" ? (body.roomSummary ?? "").trim().slice(0, 400) : body.roomSummary,
+      knownFacts: facts,
+      roomSummary: body.roomSummary,
     }),
     buildFitInstructions(parseFit(body.userFit), pace === "call"),
     pace === "call" ? VOICE_CALL_NOTE : TYPED_CHAT_NOTE,

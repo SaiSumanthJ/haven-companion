@@ -5,7 +5,7 @@ export const OLLAMA_HOST = process.env.OLLAMA_HOST ?? "http://127.0.0.1:11434";
 const host = OLLAMA_HOST;
 const CHAT_CTX = 8192;
 const CHAT_PREDICT = 512;
-const CALL_CTX = 2048;
+const CALL_CTX = 8192;
 const CALL_PREDICT = 400;
 
 function visibleText(text: string): string {

@@ -5,6 +5,7 @@ import { greetRoom, sendLine, type SendLineOptions } from "@/features/chat/sessi
 import { addChat, hasAnyTurns, selectChat } from "@/features/memory/chats";
 import { rewindBeforeTurn } from "@/features/memory/rewind";
 import { mergeFacts } from "@/features/memory/extractFacts";
+import { activeSuggestionGroups, dropSuggestion } from "@/features/memory/suggestions";
 import {
   clearConversation,
   emptyState,
@@ -33,7 +34,6 @@ export function useHavenSession() {
   const [needsName, setNeedsName] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [returning, setReturning] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     const loaded = touchOpened(loadState());
@@ -52,7 +52,8 @@ export function useHavenSession() {
     setState(next);
   }
 
-  const talk = { commit, setLiveReply, setCrisisText, setPending, setSuggestions };
+  const talk = { commit, setLiveReply, setCrisisText, setPending };
+  const { recent: recentSuggestions, past: pastSuggestions } = activeSuggestionGroups(state);
 
   return {
     state,
@@ -66,7 +67,8 @@ export function useHavenSession() {
     needsName,
     importError,
     returning,
-    suggestions,
+    recentSuggestions,
+    pastSuggestions,
     setDraft,
     setDraftFact,
     confirmAge: () => {
@@ -90,8 +92,8 @@ export function useHavenSession() {
     },
     addSuggestion: (fact: string) => {
       const latest = loadState();
-      commit({ ...latest, knownFacts: mergeFacts(latest.knownFacts, [fact]) });
-      setSuggestions((current) => current.filter((item) => item !== fact));
+      const knownFacts = mergeFacts(latest.knownFacts, [fact]);
+      commit(dropSuggestion({ ...latest, knownFacts }, fact));
     },
     forgetFact: (fact: string) => commit(removeFact(state, fact)),
     startOver: () => {
@@ -114,10 +116,7 @@ export function useHavenSession() {
     },
     toggleAdult: () => commit({ ...state, adultMode: !state.adultMode }),
     renameCompanion: (name: string) => commit({ ...state, companionName: name }),
-    openChat: (chatId: string) => {
-      commit(selectChat(loadState(), chatId));
-      setSuggestions([]);
-    },
+    openChat: (chatId: string) => commit(selectChat(loadState(), chatId)),
     newChat: () => {
       const latest = loadState();
       if ((latest.chats?.length ?? 0) >= MAX_CHATS) return;
@@ -125,7 +124,6 @@ export function useHavenSession() {
       commit(next);
       setDraft("");
       setCrisisText(null);
-      setSuggestions([]);
       void greetRoom(next, talk);
     },
     send: (attach?: AttachBundle) => {
@@ -144,7 +142,6 @@ export function useHavenSession() {
       commit(next);
       setCrisisText(null);
       setLiveReply("");
-      setSuggestions([]);
       void sendLine(next, line, health, talk, { pace: "chat" });
     },
     speakTurn: (text: string, options?: SendLineOptions) => {

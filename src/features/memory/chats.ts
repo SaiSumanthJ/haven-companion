@@ -68,6 +68,14 @@ export function mapActiveChat(
   };
 }
 
+function nextUserN(chat: HavenChat): number {
+  let max = 0;
+  for (const turn of chat.turns) {
+    if (turn.role === "user" && (turn.n ?? 0) > max) max = turn.n ?? 0;
+  }
+  return max + 1;
+}
+
 export function appendTurn(
   state: HavenState,
   role: MemoryTurn["role"],
@@ -78,19 +86,19 @@ export function appendTurn(
   const notes = attachments?.filter((note) => note.name) ?? [];
   const cleaned = stripLeakedCallLabel(content) || (notes.length ? sharedLabel(notes) : "");
   if (!cleaned) return state;
-  const turn: MemoryTurn = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    role,
-    content: cleaned,
-    at: nowIso(),
-    via,
-    attachments: notes.length ? notes : undefined,
-  };
   return mapActiveChat(state, (chat) => {
+    const turn: MemoryTurn = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      role,
+      content: cleaned,
+      at: nowIso(),
+      via,
+      n: role === "user" ? nextUserN(chat) : undefined,
+      attachments: notes.length ? notes : undefined,
+    };
     const turns = [...chat.turns, turn].slice(-MAX_TURNS);
     const untitled = chat.title === "New chat" || /^Room \d+$/.test(chat.title);
-    const title =
-      role === "user" && untitled ? titleFromLine(content) : chat.title;
+    const title = role === "user" && untitled ? titleFromLine(content) : chat.title;
     return { ...chat, turns, title };
   });
 }

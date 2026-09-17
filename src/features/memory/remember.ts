@@ -1,5 +1,6 @@
 import { activeChat, setChatSummary } from "./chats";
-import { parseFactList, unseenFacts } from "./extractFacts";
+import { parseFactList } from "./extractParse";
+import { unseenFacts } from "./extractFacts";
 import { loadState, saveState } from "./store";
 import { ROOM_SUMMARY_TURNS, type HavenState } from "./types";
 

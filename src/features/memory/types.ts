@@ -14,7 +14,15 @@ export type MemoryTurn = {
   content: string;
   at: string;
   via?: "chat" | "call";
+  n?: number;
   attachments?: AttachmentNote[];
+};
+
+export type SuggestionBatch = {
+  exchangeId: string;
+  at: string;
+  facts: string[];
+  n?: number;
 };
 
 export type HavenChat = {
@@ -23,6 +31,7 @@ export type HavenChat = {
   turns: MemoryTurn[];
   summary: string;
   createdAt: string;
+  suggestions?: SuggestionBatch[];
 };
 
 export type HavenState = {
@@ -43,5 +52,5 @@ export const MAX_TURNS = 400;
 export const MODEL_TURNS = 16;
 export const ROOM_SUMMARY_TURNS = 48;
 export const SUMMARY_MAX = 2000;
-export const MAX_FACTS = 80;
+export const MAX_FACTS = 240;
 export const MAX_CHATS = 12;

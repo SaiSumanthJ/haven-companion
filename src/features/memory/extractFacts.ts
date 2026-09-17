@@ -1,14 +1,28 @@
-const MAX_FACTS = 80;
+const MAX_FACTS = 240;
+const NAME_STOP = new Set(
+  "a an the so just very not really actually also always already about still only even quite pretty more less too here there back done ready sorry fine okay ok good bad tired lonely going trying feeling having doing looking thinking working getting being making from at in to of as if or but and with for this that they them their you your we our its currently recently probably maybe perhaps gonna wanna yeah yes no hey hi hello well now then".split(
+    " ",
+  ),
+);
+
+export function isGivenName(raw: string): boolean {
+  const name = raw.trim();
+  if (!/^[A-Za-z][A-Za-z']{1,20}$/.test(name)) return false;
+  const word = name.toLowerCase();
+  return !NAME_STOP.has(word) && !/ly$/.test(word);
+}
 
 export function extractHeuristicFacts(userText: string): string[] {
   const text = userText.trim();
   if (text.length < 6) return [];
   const facts: string[] = [];
 
-  const named = /(?:my name is|i(?:'m| am))\s+([A-Za-z][a-zA-Z]{1,20})\b/i.exec(text);
-  if (named?.[1] && !/^(a|an|the|so|just|very|not|really)\b/i.test(named[1])) {
-    const name = named[1][0].toUpperCase() + named[1].slice(1);
-    facts.push(`Name: ${name}`);
+  const named =
+    /(?:my name is|i(?:'m| am))\s+([A-Za-z][A-Za-z']{1,20})(?=\s+(?:and|but)\b|[.!?,]|$)/i.exec(
+      text,
+    );
+  if (named?.[1] && isGivenName(named[1])) {
+    facts.push(`Name: ${titleCase(named[1])}`);
   }
 
   const place =
@@ -67,45 +81,41 @@ export function stackSuggestions(
   return [...fresh, ...rest].slice(0, 24);
 }
 
-export function parseFactList(raw: string): string[] {
-  const start = raw.indexOf("[");
-  const end = raw.lastIndexOf("]");
-  if (start < 0 || end <= start) return [];
-  try {
-    const parsed = JSON.parse(raw.slice(start, end + 1)) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is string => typeof item === "string");
-  } catch {
-    return [];
-  }
+export const RECENT_SUGGESTION_BATCHES = 3;
+
+export function splitSuggestionGroups<T extends { facts: string[] }>(
+  known: string[],
+  batches: T[] | undefined,
+): { recent: T[]; past: T[] } {
+  const clean = (batches ?? [])
+    .map((batch) => ({ ...batch, facts: unseenFacts(known, batch.facts) }))
+    .filter((batch) => batch.facts.length > 0);
+  return {
+    recent: clean.slice(0, RECENT_SUGGESTION_BATCHES),
+    past: clean.slice(RECENT_SUGGESTION_BATCHES),
+  };
 }
 
-export function parseRememberPayload(raw: string): { facts: string[]; summary: string } {
-  const start = raw.indexOf("{");
-  const end = raw.lastIndexOf("}");
-  if (start >= 0 && end > start) {
-    try {
-      const parsed = JSON.parse(raw.slice(start, end + 1)) as {
-        facts?: unknown;
-        summary?: unknown;
-      };
-      return {
-        facts: Array.isArray(parsed.facts)
-          ? parsed.facts.filter((item): item is string => typeof item === "string")
-          : [],
-        summary: typeof parsed.summary === "string" ? parsed.summary : "",
-      };
-    } catch {
-      return { facts: parseFactList(raw), summary: "" };
-    }
-  }
-  return { facts: parseFactList(raw), summary: "" };
+export function splitSuggestionLists(
+  known: string[],
+  batches: Array<{ facts: string[] }> | undefined,
+): { recent: string[]; past: string[] } {
+  const { recent, past } = splitSuggestionGroups(known, batches);
+  const top = unseenFacts([], recent.flatMap((batch) => batch.facts));
+  return {
+    recent: top,
+    past: unseenFacts([], past.flatMap((batch) => batch.facts)).filter(
+      (fact) => !top.includes(fact),
+    ),
+  };
 }
 
 function cleanFact(raw: string): string | null {
   const fact = raw.replace(/^[-*]\s+/, "").replace(/^["']|["']$/g, "").trim();
   if (fact.length < 4 || fact.length > 140) return null;
   if (/https?:\/\//i.test(fact)) return null;
+  const named = /^name:\s*(.+)$/i.exec(fact);
+  if (named && !isGivenName(named[1])) return null;
   return fact;
 }
 

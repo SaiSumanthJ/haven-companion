@@ -1,7 +1,7 @@
 import { parseFit } from "@/features/companion/userFit";
 import { emptyState, newChat } from "./chats";
 import { stripLeakedCallLabel } from "./turnPace";
-import type { AttachmentNote, HavenChat, HavenState, MemoryTurn } from "./types";
+import type { AttachmentNote, HavenChat, HavenState, MemoryTurn, SuggestionBatch } from "./types";
 
 function readNotes(raw: unknown): AttachmentNote[] | undefined {
   if (!Array.isArray(raw)) return undefined;
@@ -20,24 +20,63 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+function readN(raw: unknown): number | undefined {
+  return typeof raw === "number" && raw > 0 && Number.isFinite(raw) ? Math.floor(raw) : undefined;
+}
+
+function stampUserN(turns: MemoryTurn[]): MemoryTurn[] {
+  let next = 0;
+  for (const turn of turns) {
+    if (turn.role === "user" && (turn.n ?? 0) > next) next = turn.n ?? 0;
+  }
+  return turns.map((turn) => {
+    if (turn.role !== "user" || (turn.n ?? 0) > 0) return turn;
+    next += 1;
+    return { ...turn, n: next };
+  });
+}
+
 function readTurns(raw: unknown): MemoryTurn[] {
   if (!Array.isArray(raw)) return [];
-  return raw
+  return stampUserN(
+    raw
+      .filter(
+        (turn): turn is MemoryTurn =>
+          Boolean(turn) &&
+          (turn.role === "user" || turn.role === "assistant") &&
+          typeof turn.content === "string",
+      )
+      .map((turn, index): MemoryTurn => ({
+        id: turn.id || `import-${index}`,
+        role: turn.role,
+        content: stripLeakedCallLabel(turn.content),
+        at: turn.at || nowIso(),
+        via: turn.via === "call" ? "call" : "chat",
+        n: turn.role === "user" ? readN(turn.n) : undefined,
+        attachments: readNotes(turn.attachments),
+      }))
+      .filter((turn) => turn.content.length > 0 || (turn.attachments?.length ?? 0) > 0),
+  );
+}
+
+function readSuggestions(raw: unknown): SuggestionBatch[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const batches = raw
     .filter(
-      (turn): turn is MemoryTurn =>
-        Boolean(turn) &&
-        (turn.role === "user" || turn.role === "assistant") &&
-        typeof turn.content === "string",
+      (batch): batch is SuggestionBatch =>
+        Boolean(batch) &&
+        typeof batch.exchangeId === "string" &&
+        typeof batch.at === "string" &&
+        Array.isArray(batch.facts),
     )
-    .map((turn, index): MemoryTurn => ({
-      id: turn.id || `import-${index}`,
-      role: turn.role,
-      content: stripLeakedCallLabel(turn.content),
-      at: turn.at || nowIso(),
-      via: turn.via === "call" ? "call" : "chat",
-      attachments: readNotes(turn.attachments),
+    .map((batch) => ({
+      exchangeId: batch.exchangeId,
+      at: batch.at,
+      facts: batch.facts.filter((fact): fact is string => typeof fact === "string"),
+      n: readN(batch.n),
     }))
-    .filter((turn) => turn.content.length > 0 || (turn.attachments?.length ?? 0) > 0);
+    .filter((batch) => batch.facts.length > 0);
+  return batches.length ? batches : undefined;
 }
 
 function readChats(raw: unknown, fallbackTurns: unknown): HavenChat[] {
@@ -50,6 +89,7 @@ function readChats(raw: unknown, fallbackTurns: unknown): HavenChat[] {
         turns: readTurns(chat.turns),
         summary: typeof chat.summary === "string" ? chat.summary : "",
         createdAt: typeof chat.createdAt === "string" ? chat.createdAt : nowIso(),
+        suggestions: readSuggestions(chat.suggestions),
       }));
   }
   const seeded = newChat("Room 1");

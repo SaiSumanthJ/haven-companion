@@ -1,6 +1,6 @@
 import { mergeFacts } from "./extractFacts";
 import { stripLeakedCallLabel } from "./turnPace";
-import type { HavenState, MemoryTurn } from "./types";
+import type { HavenChat, HavenState, MemoryTurn } from "./types";
 
 function cleanTurns(turns: MemoryTurn[]): MemoryTurn[] {
   return turns
@@ -10,6 +10,15 @@ function cleanTurns(turns: MemoryTurn[]): MemoryTurn[] {
       attachments: turn.attachments?.filter((note) => note.name && note.reading),
     }))
     .filter((turn) => turn.content.length > 0 || (turn.attachments?.length ?? 0) > 0);
+}
+
+function incomingLastWins(chat: HavenChat, incoming: HavenChat): HavenChat {
+  const incomingLast = incoming.turns.at(-1);
+  const diskLast = chat.turns.at(-1);
+  if (incomingLast?.id && incomingLast.id === diskLast?.id) return incoming;
+  return (incomingLast?.content.length ?? 0) >= (diskLast?.content.length ?? 0)
+    ? incoming
+    : chat;
 }
 
 export function upsertFromSnapshot(disk: HavenState, snapshot: HavenState): HavenState {
@@ -25,15 +34,13 @@ export function upsertFromSnapshot(disk: HavenState, snapshot: HavenState): Have
     chats: exists
       ? disk.chats.map((chat) => {
           if (chat.id !== incoming.id) return chat;
-          if (incoming.turns.length !== chat.turns.length) {
-            return incoming.turns.length > chat.turns.length ? incoming : chat;
-          }
-          const incomingLast = incoming.turns.at(-1);
-          const diskLast = chat.turns.at(-1);
-          if (incomingLast?.id && incomingLast.id === diskLast?.id) return incoming;
-          return (incomingLast?.content.length ?? 0) >= (diskLast?.content.length ?? 0)
-            ? incoming
-            : chat;
+          const chosen =
+            incoming.turns.length !== chat.turns.length
+              ? incoming.turns.length > chat.turns.length
+                ? incoming
+                : chat
+              : incomingLastWins(chat, incoming);
+          return { ...chosen, suggestions: chat.suggestions };
         })
       : [...disk.chats, incoming],
   };
