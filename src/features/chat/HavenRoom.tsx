@@ -1,4 +1,5 @@
 import { CallPanel } from "@/features/chat/CallPanel";
+import { HavenMark } from "@/features/chat/HavenMark";
 import { ChatThread } from "@/features/chat/ChatThread";
 import { Composer } from "@/features/chat/Composer";
 import { RoomGuide } from "@/features/chat/RoomGuide";
@@ -29,7 +30,7 @@ export function HavenRoom({ session }: HavenRoomProps) {
         <RoomSidebar session={session} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
-            <p className="haven-mark">Haven</p>
+            <HavenMark />
             <RoomGuide
               companionName={state.companionName}
               factCount={state.knownFacts.length}

@@ -7,7 +7,7 @@ export type {
   ModelAdapterId,
   ModelHealth,
 } from "./types";
-export { getModelHealth, resolveModel } from "./resolveModel";
+export { forgetResolvedModels, getModelHealth, resolveModel } from "./resolveModel";
 export {
   CALL_SENTENCE_CAP,
   callReplyComplete,

@@ -41,10 +41,7 @@ export function useHavenSession() {
     setNeedsName(loaded.ageVerified && !hasAnyTurns(loaded));
     setReturning(hasAnyTurns(loaded) || loaded.knownFacts.length > 0);
     setHydrated(true);
-    void fetch("/api/health")
-      .then((response) => response.json())
-      .then((payload: ModelHealth) => setHealth(payload))
-      .catch(() => undefined);
+    void fetch("/api/health").then((r) => r.json()).then(setHealth).catch(() => undefined);
   }, []);
 
   function commit(next: HavenState) {
@@ -71,6 +68,9 @@ export function useHavenSession() {
     pastSuggestions,
     setDraft,
     setDraftFact,
+    refreshHealth: () => {
+      void fetch("/api/health").then((r) => r.json()).then(setHealth).catch(() => undefined);
+    },
     confirmAge: () => {
       commit({ ...state, ageVerified: true });
       setNeedsName(true);

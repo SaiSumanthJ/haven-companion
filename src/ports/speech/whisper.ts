@@ -1,10 +1,12 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { selectedWhisperId } from "./whisperOffers";
 import { WHISPER_MODEL, type WhisperProgress } from "./types";
 
 type Transcriber = (audio: Float32Array) => Promise<{ text?: string } | string>;
 
 let transcriber: Transcriber | null = null;
+let loadedId = "";
 let loading: Promise<Transcriber> | null = null;
 const listeners = new Set<(progress: WhisperProgress) => void>();
 let progress: WhisperProgress = {
@@ -34,11 +36,25 @@ export function onWhisperProgress(listener: (next: WhisperProgress) => void): ()
   };
 }
 
+export function resetWhisper(): void {
+  transcriber = null;
+  loadedId = "";
+  loading = null;
+  emit({
+    status: "idle",
+    percent: 0,
+    detail: "Voice model will load on the next take.",
+  });
+}
+
 export async function ensureWhisper(): Promise<Transcriber> {
-  if (transcriber) return transcriber;
-  if (loading) return loading;
+  const wanted = selectedWhisperId();
+  if (transcriber && loadedId === wanted) return transcriber;
+  if (loading && loadedId === wanted) return loading;
+  transcriber = null;
 
   loading = (async () => {
+    loadedId = wanted;
     emit({
       status: "downloading",
       percent: 1,
@@ -51,7 +67,7 @@ export async function ensureWhisper(): Promise<Transcriber> {
     env.useFSCache = true;
     env.cacheDir = cacheDir();
 
-    const loaded = (await pipeline("automatic-speech-recognition", WHISPER_MODEL, {
+    const loaded = (await pipeline("automatic-speech-recognition", wanted, {
       progress_callback: (event: {
         status?: string;
         progress?: number;
@@ -78,6 +94,7 @@ export async function ensureWhisper(): Promise<Transcriber> {
     })) as Transcriber;
 
     transcriber = loaded;
+    loadedId = wanted;
     emit({
       status: "ready",
       percent: 100,

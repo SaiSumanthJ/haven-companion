@@ -11,7 +11,8 @@ import {
 } from "@/features/memory/suggestions";
 import { loadState } from "@/features/memory/store";
 import type { HavenState } from "@/features/memory/types";
-import { CALL_SENTENCE_CAP, type ModelHealth, type TalkPace } from "@/ports/model";
+import { CALL_SENTENCE_CAP } from "@/ports/model/callReply";
+import type { ModelHealth, TalkPace } from "@/ports/model";
 
 type TalkApi = {
   commit: (next: HavenState) => void;

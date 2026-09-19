@@ -187,6 +187,8 @@ Open **that** address in a browser on the **same** computer. `127.0.0.1` means �
 3. Optionally say how they should know you.
 4. Talk.
 
+Later, **Menu → Local models** lists the Ollama models already on this computer so you can pick typed chat, Call, and hearing. **Menu → How they know you** is one dropdown per line.
+
 The first real reply can take a minute while the model wakes. Voice and Call the first time also download Whisper and Kokoro into a `.haven` folder in this project (about 150 MB, once). Keep the computer on the network for that first download; after that, speech stays local.
 
 To stop: press `Ctrl+C` in the terminal. Start again later with `npm run dev` (Ollama still open).

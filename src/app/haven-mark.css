@@ -1,0 +1,176 @@
+.haven-mark-wrap {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.7rem 1.15rem 0.55rem 0.15rem;
+}
+
+.haven-mark-halo {
+  position: absolute;
+  inset: -0.15rem 8% auto;
+  height: 2.8rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--haven-brass) 34%, transparent) 0%,
+    transparent 72%
+  );
+  pointer-events: none;
+  animation: haven-halo 12s ease-in-out infinite;
+}
+
+.haven-mark-orbit {
+  position: absolute;
+  inset: 0.15rem auto auto 0.05rem;
+  width: 3.1rem;
+  height: 3.1rem;
+  pointer-events: none;
+  animation: haven-orbit 28s linear infinite;
+}
+
+.haven-mark-orbit i {
+  position: absolute;
+  width: 0.28rem;
+  height: 0.28rem;
+  border: 1px solid color-mix(in srgb, var(--haven-brass) 70%, #f2e4c4);
+  background: color-mix(in srgb, var(--haven-brass) 45%, transparent);
+  transform: rotate(45deg);
+}
+
+.haven-mark-orbit i:nth-child(1) {
+  top: 0;
+  left: 50%;
+  margin-left: -0.14rem;
+}
+
+.haven-mark-orbit i:nth-child(2) {
+  top: 50%;
+  right: 0;
+  margin-top: -0.14rem;
+}
+
+.haven-mark-orbit i:nth-child(3) {
+  bottom: 0;
+  left: 50%;
+  margin-left: -0.14rem;
+}
+
+.haven-mark-orbit i:nth-child(4) {
+  top: 50%;
+  left: 0;
+  margin-top: -0.14rem;
+}
+
+.haven-mark {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  margin-right: -0.12em;
+  font-family: var(--font-haven-display), var(--font-haven-serif), ui-serif, Georgia, serif;
+  font-size: clamp(2.55rem, 6.2vw, 3.4rem);
+  font-weight: 900;
+  font-optical-sizing: auto;
+  line-height: 0.9;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background-image: linear-gradient(
+    105deg,
+    #8d6d3e 0%,
+    #f4e3bf 22%,
+    #c4a574 48%,
+    #fff6df 70%,
+    #9a7d4e 100%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: haven-sheen 16s ease-in-out infinite;
+}
+
+.haven-mark-features {
+  position: relative;
+  height: 1.05rem;
+  margin: 0.55rem 0 0;
+  min-width: 11rem;
+}
+
+.haven-mark-features span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--haven-mute);
+  opacity: 0;
+  animation: haven-feature 16s ease-in-out infinite;
+}
+
+.haven-mark-features span:nth-child(2) {
+  animation-delay: 4s;
+}
+
+.haven-mark-features span:nth-child(3) {
+  animation-delay: 8s;
+}
+
+.haven-mark-features span:nth-child(4) {
+  animation-delay: 12s;
+}
+
+@keyframes haven-sheen {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes haven-halo {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes haven-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes haven-feature {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  10%,
+  20% {
+    opacity: 1;
+  }
+  26%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .haven-mark,
+  .haven-mark-halo,
+  .haven-mark-orbit,
+  .haven-mark-features span {
+    animation: none;
+  }
+
+  .haven-mark-features span:first-child {
+    opacity: 1;
+  }
+}

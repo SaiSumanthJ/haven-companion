@@ -14,6 +14,11 @@ function forcedAdapter(): ModelAdapterId | "auto" {
 let cached: CompanionModel | null = null;
 let cachedCall: CompanionModel | null = null;
 
+export function forgetResolvedModels(): void {
+  cached = null;
+  cachedCall = null;
+}
+
 export async function resolveModel(pace: TalkPace = "chat"): Promise<CompanionModel> {
   if (pace === "call") {
     if (cachedCall) return cachedCall;

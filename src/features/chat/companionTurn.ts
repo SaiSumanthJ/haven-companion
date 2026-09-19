@@ -5,7 +5,8 @@ import { activeChat, activeTurns, appendTurn, messagesForModel } from "@/feature
 import { applyAssistantDraft } from "@/features/memory/writeAssistant";
 import type { HavenState } from "@/features/memory/types";
 import { stripLeakedCallLabel } from "@/features/memory/turnPace";
-import { finishCallReply, type TalkPace } from "@/ports/model";
+import { finishCallReply } from "@/ports/model/callReply";
+import type { TalkPace } from "@/ports/model";
 
 const CALL_FALLBACK = "I'm here. Say that again when you're ready.";
 

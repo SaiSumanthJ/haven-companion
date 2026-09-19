@@ -1,5 +1,6 @@
 import type { CompanionModel } from "../types";
 import { createOllamaModel, OLLAMA_HOST } from "./ollama";
+import { readLocalPrefs } from "@/ports/localPrefs";
 import {
   envWantedCallModel,
   envWantedModel,
@@ -9,7 +10,7 @@ import {
   type ListedOllamaModel,
 } from "./ollamaSelect";
 
-async function listInstalled(): Promise<ListedOllamaModel[]> {
+export async function listInstalled(): Promise<ListedOllamaModel[]> {
   const response = await fetch(`${OLLAMA_HOST}/api/tags`, {
     signal: AbortSignal.timeout(2000),
   });
@@ -36,7 +37,7 @@ export async function resolveOllamaModel(): Promise<CompanionModel | null> {
     const picked = pickComfortableModel(
       await listInstalled(),
       systemMemoryBytes(),
-      envWantedModel(),
+      readLocalPrefs().chatModel ?? envWantedModel(),
     );
     if (!picked) return null;
     return createOllamaModel(picked.name);
@@ -49,7 +50,11 @@ export async function resolveOllamaCallModel(): Promise<CompanionModel | null> {
   try {
     const installed = await listInstalled();
     const ram = systemMemoryBytes();
-    const fast = pickFastCallModel(installed, ram, envWantedCallModel());
+    const fast = pickFastCallModel(
+      installed,
+      ram,
+      readLocalPrefs().callModel ?? envWantedCallModel(),
+    );
     if (fast) return createOllamaModel(fast.name);
     return resolveOllamaModel();
   } catch {

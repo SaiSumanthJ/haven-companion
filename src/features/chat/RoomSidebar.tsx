@@ -3,6 +3,7 @@
 import { CallSettings } from "@/features/chat/CallSettings";
 import { ChatList } from "@/features/chat/ChatList";
 import { CompanionName } from "@/features/chat/CompanionName";
+import { LocalModels } from "@/features/chat/LocalModels";
 import { SavedFacts } from "@/features/chat/SavedFacts";
 import { SidebarSection } from "@/features/chat/SidebarSection";
 import { quietBtn } from "@/features/chat/quietBtn";
@@ -16,7 +17,7 @@ type RoomSidebarProps = {
   session: ReturnType<typeof useHavenSession>;
 };
 
-const KEYS = ["rooms", "name", "fit", "voice", "facts", "device"] as const;
+const KEYS = ["rooms", "name", "fit", "models", "voice", "facts", "device"] as const;
 
 export function RoomSidebar({ session }: RoomSidebarProps) {
   const [open, setOpen] = useState(false);
@@ -95,6 +96,13 @@ export function RoomSidebar({ session }: RoomSidebarProps) {
               onToggle={() => toggle("fit")}
             >
               <FitPane fit={state.userFit} onSave={session.saveFit} />
+            </SidebarSection>
+            <SidebarSection
+              title="Local models"
+              open={pane === "models"}
+              onToggle={() => toggle("models")}
+            >
+              <LocalModels onChanged={session.refreshHealth} />
             </SidebarSection>
             <SidebarSection title="Voice call" open={pane === "voice"} onToggle={() => toggle("voice")}>
               <CallSettings
