@@ -14,7 +14,7 @@ const LINES = [
   ["Write", "Enter sends. Shift+Enter is a new line. Edit a You line to restart from there."],
   ["Attach", "Pictures, documents, or a short clip. Read on this computer. Up to three files."],
   ["Voice", "Fills the box. You still press Send."],
-  ["Call", "Call starts the first take. After they answer, press Talk, then Done talking. End in the grid stops the voice."],
+  ["Call", "Call starts a spoken take. Pick automatic (it takes the pause) or press Talk, then Done talking. End in the grid stops the voice."],
   ["A long talk", "Still software. A walk, a friend, or a pause still counts."],
 ] as const;
 

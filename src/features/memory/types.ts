@@ -16,6 +16,7 @@ export type MemoryTurn = {
   via?: "chat" | "call";
   n?: number;
   attachments?: AttachmentNote[];
+  usedFacts?: string[];
 };
 
 export type SuggestionBatch = {

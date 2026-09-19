@@ -11,7 +11,7 @@ export function ChatApp() {
 
   if (!session.hydrated) {
     return (
-      <main className="mx-auto flex min-h-full w-full max-w-3xl items-start px-4 pt-8 sm:px-6">
+      <main className="haven-room-enter mx-auto flex min-h-full w-full max-w-3xl items-start px-4 pt-8 sm:px-6">
         <HavenMark />
       </main>
     );

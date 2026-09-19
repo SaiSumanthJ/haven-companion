@@ -2,7 +2,8 @@ import type { AttachBundle } from "@/features/attach/types";
 import { requestReply } from "@/features/chat/requestReply";
 import { OPENING_FALLBACK, OPENING_USER_LINE } from "@/features/companion/opening";
 import { activeChat, activeTurns, appendTurn, messagesForModel } from "@/features/memory/chats";
-import { applyAssistantDraft } from "@/features/memory/writeAssistant";
+import { applyAssistantDraft, stampUsedFacts } from "@/features/memory/writeAssistant";
+import { salientFacts } from "@/features/memory/usedFacts";
 import type { HavenState } from "@/features/memory/types";
 import { stripLeakedCallLabel } from "@/features/memory/turnPace";
 import { finishCallReply } from "@/ports/model/callReply";
@@ -50,6 +51,12 @@ export async function companionTurn({
       companionName: withUser.companionName,
       adultMode: withUser.adultMode,
       knownFacts: withUser.knownFacts,
+      salientFacts: salientFacts(withUser.knownFacts, [
+        userLine,
+        ...activeTurns(withUser)
+          .slice(-4)
+          .map((turn) => turn.content),
+      ]),
       roomSummary: activeChat(withUser)?.summary ?? "",
       userFit: withUser.userFit,
       pace,
@@ -81,6 +88,7 @@ export async function companionTurn({
   }
   if (draftId) latest = applyAssistantDraft(latest, draftId, text, via).next;
   else latest = appendTurn(withUser, "assistant", text, via);
+  latest = stampUsedFacts(latest, userLine, text);
   onUserSaved?.(latest);
   return { next: latest, crisisText: payload.kind === "crisis" ? text : null };
 }

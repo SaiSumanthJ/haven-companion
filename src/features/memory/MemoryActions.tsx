@@ -28,6 +28,12 @@ export function MemoryActions({
   return (
     <div className="flex flex-col gap-3">
       {mode === "all" ? (
+        <p className="text-xs leading-5 text-[var(--haven-mute)]">
+          Rooms and saved facts live in this browser, on this address. The desktop
+          app and a tab can look like two empty houses. Export before you switch.
+        </p>
+      ) : null}
+      {mode === "all" ? (
         <button
           type="button"
           role="switch"

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "./haven-mark.css";
+@import "./haven-motion.css";
+@import "./haven-surface.css";
 
 :root {
   --haven-night: #14110e;
@@ -47,11 +49,18 @@ body {
   padding: 0.2rem 0.55rem;
   border: 1px solid var(--haven-edge);
   border-radius: 999px;
+  background: transparent;
   color: var(--haven-mute);
   font-size: 0.62rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.14em;
   line-height: 1.2;
+  cursor: pointer;
+}
+
+button.haven-talk-n:hover {
+  border-color: var(--haven-brass);
+  color: var(--haven-ink);
 }
 
 .haven-said {
@@ -69,6 +78,43 @@ body {
 .haven-said-them {
   border-left-color: var(--haven-mute);
   background: color-mix(in srgb, var(--haven-night) 55%, var(--haven-panel));
+}
+
+.haven-thread {
+  position: relative;
+  min-height: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.haven-thread-scroll {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.5rem 0.7rem;
+  column-gap: 0.35rem;
+  align-items: stretch;
+  overflow-y: auto;
+}
+
+.haven-thread-talk {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.haven-thread-gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+
+.haven-thread-gutter > button {
+  position: sticky;
+  bottom: 0.75rem;
 }
 
 .haven-scroll {

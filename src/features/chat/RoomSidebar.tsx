@@ -8,10 +8,12 @@ import { SavedFacts } from "@/features/chat/SavedFacts";
 import { SidebarSection } from "@/features/chat/SidebarSection";
 import { quietBtn } from "@/features/chat/quietBtn";
 import type { useHavenSession } from "@/features/chat/useHavenSession";
+import { FitLeaveBar } from "@/features/companion/FitLeaveBar";
 import { FitPane } from "@/features/companion/FitPane";
+import { useFitLeave } from "@/features/companion/useFitLeave";
 import { MemoryActions } from "@/features/memory/MemoryActions";
 import { useCallPrefs } from "@/features/voice/useCallPrefs";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type RoomSidebarProps = {
   session: ReturnType<typeof useHavenSession>;
@@ -22,17 +24,20 @@ const KEYS = ["rooms", "name", "fit", "models", "voice", "facts", "device"] as c
 export function RoomSidebar({ session }: RoomSidebarProps) {
   const [open, setOpen] = useState(false);
   const [pane, setPane] = useState<(typeof KEYS)[number] | null>(null);
+  const leave = useFitLeave(open, () => setOpen(false), () => setPane("fit"));
   const { state } = session;
   const callPrefs = useCallPrefs();
 
-  useEffect(() => {
-    if (!open) return;
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  function askLeave(next: () => void) {
+    if (leave.dirty) setPane("fit");
+    leave.ask(next);
+  }
+
+  function toggle(key: (typeof KEYS)[number]) {
+    const next = pane === key ? null : key;
+    if (pane === "fit" && next !== "fit") askLeave(() => setPane(next));
+    else setPane(next);
+  }
 
   function exportMemory() {
     const blob = new Blob([session.exportMemory()], { type: "application/json" });
@@ -42,10 +47,6 @@ export function RoomSidebar({ session }: RoomSidebarProps) {
     link.download = "haven-memory.json";
     link.click();
     URL.revokeObjectURL(url);
-  }
-
-  function toggle(key: (typeof KEYS)[number]) {
-    setPane((current) => (current === key ? null : key));
   }
 
   return (
@@ -64,18 +65,18 @@ export function RoomSidebar({ session }: RoomSidebarProps) {
           <button
             type="button"
             aria-label="Close menu"
-            onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/50"
+            onClick={() => askLeave(() => setOpen(false))}
+            className="haven-veil absolute inset-0 bg-black/50"
           />
           <aside
             id="haven-sidebar"
-            className="haven-scroll absolute inset-y-0 left-0 flex w-[min(22rem,calc(100vw-2rem))] flex-col overflow-y-auto border-r border-[var(--haven-edge)] bg-[var(--haven-night)] px-4 py-5 pt-[max(1.25rem,env(safe-area-inset-top))]"
+            className="haven-scroll haven-menu-enter absolute inset-y-0 left-0 flex w-[min(22rem,calc(100vw-2rem))] flex-col overflow-y-auto border-r border-[var(--haven-edge)] bg-[var(--haven-night)] px-4 py-5 pt-[max(1.25rem,env(safe-area-inset-top))]"
           >
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs tracking-[0.18em] text-[var(--haven-brass)] uppercase">
                 Rooms & memory
               </p>
-              <button type="button" onClick={() => setOpen(false)} className={quietBtn}>
+              <button type="button" onClick={() => askLeave(() => setOpen(false))} className={quietBtn}>
                 Close
               </button>
             </div>
@@ -90,12 +91,20 @@ export function RoomSidebar({ session }: RoomSidebarProps) {
             <SidebarSection title="Name" open={pane === "name"} onToggle={() => toggle("name")}>
               <CompanionName name={state.companionName} onRename={session.renameCompanion} />
             </SidebarSection>
+            {leave.warn ? (
+              <FitLeaveBar onSave={() => leave.finish("save")} onDiscard={() => leave.finish("discard")} />
+            ) : null}
             <SidebarSection
               title="How they know you"
               open={pane === "fit"}
               onToggle={() => toggle("fit")}
             >
-              <FitPane fit={state.userFit} onSave={session.saveFit} />
+              <FitPane
+                fit={state.userFit}
+                onSave={session.saveFit}
+                onDirtyChange={leave.setDirty}
+                onBind={leave.bind}
+              />
             </SidebarSection>
             <SidebarSection
               title="Local models"

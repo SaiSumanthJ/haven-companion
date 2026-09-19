@@ -1,5 +1,6 @@
 import { activeTurns, appendTurn, mapActiveChat } from "./chats";
 import type { HavenState, MemoryTurn } from "./types";
+import { factsUsed } from "./usedFacts";
 import { stripLeakedCallLabel } from "./turnPace";
 
 export function patchTurnContent(
@@ -25,4 +26,20 @@ export function applyAssistantDraft(
   const id = activeTurns(next).at(-1)?.id;
   if (!id) return { next, draftId: "" };
   return { next, draftId: id };
+}
+
+export function stampUsedFacts(
+  state: HavenState,
+  userText: string,
+  replyText: string,
+): HavenState {
+  const used = factsUsed(state.knownFacts, userText, replyText);
+  const last = activeTurns(state).at(-1);
+  if (!last || last.role !== "assistant") return state;
+  return mapActiveChat(state, (chat) => ({
+    ...chat,
+    turns: chat.turns.map((turn) =>
+      turn.id === last.id ? { ...turn, usedFacts: used } : turn,
+    ),
+  }));
 }

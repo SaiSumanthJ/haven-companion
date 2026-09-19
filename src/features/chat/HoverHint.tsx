@@ -1,35 +1,44 @@
 "use client";
 
 import { InfoIcon } from "@/features/chat/ActionIcon";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 type HoverHintProps = {
   label: string;
   children: ReactNode;
+  compact?: boolean;
 };
 
-export function HoverHint({ label, children }: HoverHintProps) {
+export function HoverHint({ label, children, compact }: HoverHintProps) {
   const [open, setOpen] = useState(false);
+  const pinned = useRef(false);
 
   return (
     <div
       className="relative shrink-0"
       onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseLeave={() => {
+        if (!pinned.current) setOpen(false);
+      }}
     >
       <button
         type="button"
         aria-expanded={open}
         aria-label={label}
-        onClick={() => setOpen((current) => !current)}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--haven-edge)] text-[var(--haven-mute)] hover:text-[var(--haven-ink)]"
+        onClick={() => {
+          pinned.current = !pinned.current;
+          setOpen(pinned.current);
+        }}
+        className={`inline-flex items-center justify-center rounded-md border border-[var(--haven-edge)] text-[var(--haven-mute)] hover:text-[var(--haven-ink)] ${
+          compact ? "h-7 w-7" : "h-9 w-9"
+        }`}
       >
         <InfoIcon />
       </button>
       {open ? (
         <div
           role="note"
-          className="absolute right-0 z-30 mt-2 w-[min(20rem,calc(100vw-2rem))] space-y-3 rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-4 py-3 shadow-lg"
+          className="haven-hint absolute right-0 z-30 mt-2 w-[min(20rem,calc(100vw-2rem))] space-y-3 rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-4 py-3 shadow-lg"
         >
           {children}
         </div>

@@ -10,6 +10,7 @@ type Body = {
   companionName?: string;
   adultMode?: boolean;
   knownFacts?: string[];
+  salientFacts?: string[];
   roomSummary?: string;
   userFit?: unknown;
   messages?: ChatMessage[];
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
       companionName: body.companionName?.trim() || "Ash",
       adultMode: Boolean(body.adultMode),
       knownFacts: facts,
+      salientFacts: body.salientFacts,
       roomSummary: body.roomSummary,
     }),
     buildFitInstructions(parseFit(body.userFit), pace === "call"),

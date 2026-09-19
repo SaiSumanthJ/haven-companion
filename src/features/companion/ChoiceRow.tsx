@@ -57,13 +57,13 @@ export function ChoiceRow<T extends string>({
   return (
     <details
       ref={box}
-      className="rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-3 py-2"
+      className="haven-draw rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-3 py-2"
     >
       <summary className="cursor-pointer list-outside text-sm text-[var(--haven-ink)]">
         <span className="text-[var(--haven-mute)]">{label}</span>
         <span className="ml-2 text-[var(--haven-brass)]">{current}</span>
       </summary>
-      <div className="mt-3 space-y-3">
+      <div className="haven-draw-body mt-3 space-y-3">
         {asGroups(options, groups).map((group, index) => (
           <div key={group.title ?? String(index)} className="space-y-2">
             {group.title ? (

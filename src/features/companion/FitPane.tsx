@@ -4,21 +4,45 @@ import { boxBtn } from "@/features/chat/quietBtn";
 import { FitAboutFields } from "@/features/companion/FitAboutFields";
 import { FitPersonalityFields } from "@/features/companion/FitPersonalityFields";
 import { FitStyleFields } from "@/features/companion/FitStyleFields";
+import { FitWarn } from "@/features/companion/FitWarn";
+import { fitsEqual } from "@/features/companion/fitEqual";
 import { emptyFit, type UserFit } from "@/features/companion/userFit";
 import { useEffect, useState } from "react";
 
 type FitPaneProps = {
   fit?: UserFit;
   onSave: (next: UserFit) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  onBind?: (actions: { save: () => void; discard: () => void }) => void;
 };
 
-export function FitPane({ fit, onSave }: FitPaneProps) {
-  const [draft, setDraft] = useState<UserFit>(fit ?? emptyFit());
-  const [saved, setSaved] = useState(false);
+export function FitPane({ fit, onSave, onDirtyChange, onBind }: FitPaneProps) {
+  const saved = fit ?? emptyFit();
+  const [draft, setDraft] = useState<UserFit>(saved);
+  const [justSaved, setJustSaved] = useState(false);
+  const dirty = !fitsEqual(draft, saved);
 
   useEffect(() => {
     setDraft(fit ?? emptyFit());
   }, [fit]);
+
+  function save() {
+    onSave(draft);
+    setJustSaved(true);
+  }
+
+  function discard() {
+    setDraft(saved);
+    setJustSaved(false);
+  }
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  useEffect(() => {
+    onBind?.({ save, discard });
+  }, [draft, saved, onBind, onSave]);
 
   return (
     <div className="space-y-5">
@@ -27,20 +51,19 @@ export function FitPane({ fit, onSave }: FitPaneProps) {
         Sentinels, and Explorers. These files only change the instructions for
         the same model. The brain itself is under Local models.
       </p>
+      {dirty ? <FitWarn onSave={save} onDiscard={discard} /> : null}
       <FitPersonalityFields fit={draft} onChange={setDraft} />
       <FitAboutFields fit={draft} onChange={setDraft} />
       <FitStyleFields fit={draft} onChange={setDraft} />
       <button
         type="button"
-        onClick={() => {
-          onSave(draft);
-          setSaved(true);
-        }}
+        onClick={save}
+        disabled={!dirty}
         className={boxBtn}
       >
         Save how they know you
       </button>
-      {saved ? (
+      {justSaved && !dirty ? (
         <p className="text-xs text-[var(--haven-brass)]">Saved. The next message uses this.</p>
       ) : null}
     </div>

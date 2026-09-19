@@ -72,6 +72,7 @@ export function LocalModels({ onChanged }: LocalModelsProps) {
         </p>
       ) : null}
       <ModelPick
+        mark="type"
         label="Text to text"
         value={catalog.chat ?? ""}
         onChange={(value) => void save({ chatModel: value || null })}
@@ -82,6 +83,7 @@ export function LocalModels({ onChanged }: LocalModelsProps) {
         }))}
       />
       <ModelPick
+        mark="call"
         label="Voice to voice"
         value={catalog.call ?? ""}
         onChange={(value) => void save({ callModel: value || null })}
@@ -92,6 +94,7 @@ export function LocalModels({ onChanged }: LocalModelsProps) {
         }))}
       />
       <ModelPick
+        mark="hear"
         label="Voice to text"
         value={catalog.whisper}
         onChange={(value) => void save({ whisperModel: value })}
@@ -114,12 +117,14 @@ export function LocalModels({ onChanged }: LocalModelsProps) {
 }
 
 function ModelPick({
+  mark,
   label,
   value,
   empty,
   options,
   onChange,
 }: {
+  mark: "type" | "hear" | "call";
   label: string;
   value: string;
   empty?: string;
@@ -128,7 +133,10 @@ function ModelPick({
 }) {
   return (
     <label className="block space-y-2 text-[var(--haven-mute)]">
-      {label}
+      <span className="flex items-center gap-2">
+        <i className={`haven-shift-${mark}`} aria-hidden />
+        {label}
+      </span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}

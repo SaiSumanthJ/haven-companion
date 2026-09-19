@@ -54,6 +54,9 @@ function readTurns(raw: unknown): MemoryTurn[] {
         via: turn.via === "call" ? "call" : "chat",
         n: turn.role === "user" ? readN(turn.n) : undefined,
         attachments: readNotes(turn.attachments),
+        usedFacts: Array.isArray(turn.usedFacts)
+          ? turn.usedFacts.filter((fact): fact is string => typeof fact === "string" && fact.trim().length > 0)
+          : undefined,
       }))
       .filter((turn) => turn.content.length > 0 || (turn.attachments?.length ?? 0) > 0),
   );

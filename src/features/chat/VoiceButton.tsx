@@ -14,6 +14,7 @@ export function VoiceButton({
   onToggle,
 }: VoiceButtonProps) {
   return (
+    <span className={`haven-act-hear${listening ? " is-on" : ""}`}>
     <button
       type="button"
       onClick={onToggle}
@@ -30,5 +31,6 @@ export function VoiceButton({
       <MicIcon />
       {listening ? "Stop" : "Voice"}
     </button>
+    </span>
   );
 }

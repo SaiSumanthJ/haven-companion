@@ -9,6 +9,7 @@ type CallButtonProps = {
 
 export function CallButton({ active, supported, disabled, onClick }: CallButtonProps) {
   return (
+    <span className={`haven-act-call${active ? " is-on" : ""}`}>
     <button
       type="button"
       onClick={onClick}
@@ -25,5 +26,6 @@ export function CallButton({ active, supported, disabled, onClick }: CallButtonP
       <PhoneIcon />
       {active ? "End" : "Call"}
     </button>
+    </span>
   );
 }

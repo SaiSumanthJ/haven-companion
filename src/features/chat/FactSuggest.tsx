@@ -1,5 +1,6 @@
 "use client";
 
+import { TalkMark } from "@/features/chat/TalkMark";
 import { quietBtn } from "@/features/chat/quietBtn";
 import type { SuggestionGroup } from "@/features/memory/suggestions";
 import { useState } from "react";
@@ -31,7 +32,7 @@ function SnippetList({ facts, onAdd }: { facts: string[]; onAdd: (fact: string) 
 function ExchangeBlock({ group, onAdd }: { group: SuggestionGroup; onAdd: (fact: string) => void }) {
   return (
     <div className="space-y-2">
-      <p className="haven-talk-n">{group.n}</p>
+      <TalkMark n={group.n} />
       <SnippetList facts={group.facts} onAdd={onAdd} />
     </div>
   );
@@ -49,11 +50,11 @@ export function FactSuggest({ recent, past, onAdd }: FactSuggestProps) {
   }
 
   return (
-    <details className="rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-3 py-2">
+    <details className="haven-remember rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-3 py-2">
       <summary className="cursor-pointer text-xs tracking-[0.14em] text-[var(--haven-brass)] uppercase">
         Suggested memory · {count}
       </summary>
-      <div className="mt-3 space-y-3">
+      <div className="haven-draw-body mt-3 space-y-3">
         <p className="text-xs leading-5 text-[var(--haven-mute)]">
           Add only the details you want kept. Open Other if something important is missing.
         </p>
@@ -67,11 +68,11 @@ export function FactSuggest({ recent, past, onAdd }: FactSuggestProps) {
           <p className="text-sm text-[var(--haven-mute)]">Nothing unused from the last three talks.</p>
         )}
         {past.length > 0 ? (
-          <details className="rounded-md border border-[var(--haven-edge)] bg-[var(--haven-night)] px-3 py-2">
+          <details className="haven-remember rounded-md border border-[var(--haven-edge)] bg-[var(--haven-night)] px-3 py-2">
             <summary className="cursor-pointer text-xs tracking-[0.14em] text-[var(--haven-brass)] uppercase">
               Past suggestions · {past.reduce((sum, group) => sum + group.facts.length, 0)}
             </summary>
-            <div className="mt-2 space-y-3">
+            <div className="haven-draw-body mt-2 space-y-3">
               {past.map((group) => (
                 <ExchangeBlock key={group.exchangeId} group={group} onAdd={onAdd} />
               ))}

@@ -32,7 +32,7 @@ export function SidebarSection({ title, open, onToggle, children }: SidebarSecti
         }`}
       >
         <div className="overflow-hidden">
-          <div className="pb-3">{children}</div>
+          <div className={`pb-3 ${open ? "haven-reveal" : ""}`}>{children}</div>
         </div>
       </div>
     </div>

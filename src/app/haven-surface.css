@@ -1,0 +1,118 @@
+button,
+select,
+input,
+textarea,
+summary {
+  transition:
+    border-color 0.22s ease,
+    color 0.22s ease,
+    background-color 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.haven-room-enter {
+  animation: haven-reveal-in 0.45s ease-out;
+}
+
+.haven-step-enter {
+  animation: haven-reveal-in 0.32s ease-out;
+}
+
+.haven-pair-arrive {
+  animation: haven-reveal-in 0.4s ease-out;
+}
+
+.haven-pair-arrive > .haven-talk-n {
+  border-color: color-mix(in srgb, var(--haven-brass) 55%, var(--haven-edge));
+  animation: haven-n-glow 0.9s ease-out;
+}
+
+.haven-wait {
+  animation: haven-wait-glow 2.4s ease-in-out infinite;
+}
+
+.haven-said-live {
+  box-shadow: inset 2px 0 0 var(--haven-brass);
+  animation: haven-live-rail 1.8s ease-in-out infinite;
+}
+
+.haven-down {
+  animation: haven-wait-glow 2.8s ease-in-out infinite;
+}
+
+.haven-veil {
+  animation: haven-reveal-in 0.28s ease-out;
+}
+
+.haven-hint {
+  animation: haven-reveal-in 0.22s ease-out;
+}
+
+.haven-chip {
+  animation: haven-reveal-in 0.28s ease-out;
+}
+
+.haven-crisis-in {
+  animation: haven-reveal-in 0.3s ease-out;
+}
+
+.haven-kicker::after {
+  content: "";
+  display: block;
+  width: 2.4rem;
+  height: 1px;
+  margin-top: 0.55rem;
+  background: linear-gradient(90deg, var(--haven-brass), transparent);
+  animation: haven-type-sheen 1.1s ease-out;
+}
+
+@keyframes haven-n-glow {
+  from {
+    color: var(--haven-brass);
+  }
+  to {
+    color: var(--haven-mute);
+  }
+}
+
+@keyframes haven-wait-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes haven-live-rail {
+  0%,
+  100% {
+    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--haven-brass) 40%, transparent);
+  }
+  50% {
+    box-shadow: inset 2px 0 0 var(--haven-brass);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .haven-room-enter,
+  .haven-step-enter,
+  .haven-pair-arrive,
+  .haven-pair-arrive > .haven-talk-n,
+  .haven-wait,
+  .haven-said-live,
+  .haven-down,
+  .haven-veil,
+  .haven-hint,
+  .haven-chip,
+  .haven-crisis-in,
+  .haven-kicker::after {
+    animation: none;
+  }
+
+  .haven-wait,
+  .haven-down {
+    opacity: 1;
+  }
+}

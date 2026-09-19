@@ -12,7 +12,11 @@ import {
   speakLocal,
   unlockLocalSpeech,
 } from "@/features/voice/localSpeak";
-import { fetchSpeakStatus, fetchSpeechStatus } from "@/features/voice/speechStatus";
+import {
+  fetchSpeakStatus,
+  fetchSpeechStatus,
+  type WhisperProgress,
+} from "@/features/voice/speechStatus";
 import { canUseLocalVoice } from "@/features/voice/useVoiceToText";
 import { useEffect, useRef, useState } from "react";
 
@@ -21,6 +25,16 @@ export function useCallPrefs() {
   const [voices, setVoices] = useState<VoiceChoice[]>([]);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hear, setHear] = useState<WhisperProgress>({
+    status: "idle",
+    percent: 0,
+    detail: "Hearing is starting on this computer…",
+  });
+  const [speak, setSpeak] = useState<WhisperProgress>({
+    status: "idle",
+    percent: 0,
+    detail: "Spoken voice is starting on this computer…",
+  });
   const prefsRef = useRef(prefs);
 
   function apply(next: CallPrefs) {
@@ -59,6 +73,8 @@ export function useCallPrefs() {
           fetchSpeechStatus().catch(() => null),
           fetchSpeakStatus().catch(() => null),
         ]);
+        if (whisper) setHear(whisper);
+        if (voice) setSpeak(voice);
         hear = hear || whisper?.status === "ready";
         speak = speak || voice?.status === "ready";
         if (hear && speak) {
@@ -80,6 +96,8 @@ export function useCallPrefs() {
     prefsRef,
     voices,
     ready,
+    hear,
+    speak,
     error,
     setError,
     supported: canUseLocalVoice() && canSpeakLocally(),

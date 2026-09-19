@@ -6,7 +6,7 @@ import { transcribeLocal } from "@/features/voice/speechStatus";
 import { stopRecorder } from "@/features/voice/recordClip";
 import type { MutableRefObject } from "react";
 
-export type CallPhase = "off" | "listening" | "working" | "speaking";
+export type CallPhase = "off" | "listening" | "hearing" | "thinking" | "speaking";
 
 type Pump = ReturnType<typeof createSpeakPump>;
 
@@ -57,7 +57,7 @@ export async function finishCallTalk(api: CallTurnApi) {
     void api.listen();
     return;
   }
-  api.setPhase("working");
+  api.setPhase("hearing");
   const blob = await stopRecorder(recorder, api.chunksRef.current);
   api.releaseMic();
   if (blob.size < 1000) {
@@ -72,6 +72,7 @@ export async function finishCallTalk(api: CallTurnApi) {
       if (api.alive.current) void api.listen();
       return;
     }
+    api.setPhase("thinking");
     await replyOnCall(text, api);
   } catch (caught) {
     api.setError(caught instanceof Error ? caught.message : "The call lost that line.");

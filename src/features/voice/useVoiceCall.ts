@@ -11,6 +11,7 @@ import {
 import { openMicRecorder } from "@/features/voice/recordClip";
 import { createSpeakPump } from "@/features/voice/speakQueue";
 import { canUseLocalVoice } from "@/features/voice/useVoiceToText";
+import { watchTalkEnd } from "@/features/voice/watchTalkEnd";
 import { useRef, useState } from "react";
 
 export type { CallPhase };
@@ -26,6 +27,7 @@ export function useVoiceCall(
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const pumpRef = useRef<ReturnType<typeof createSpeakPump> | null>(null);
+  const stopWatch = useRef<(() => void) | null>(null);
   const alive = useRef(false);
   const phaseRef = useRef(phase);
   const activeRef = useRef(active);
@@ -33,6 +35,8 @@ export function useVoiceCall(
   activeRef.current = active;
 
   function releaseMic() {
+    stopWatch.current?.();
+    stopWatch.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     recorderRef.current = null;
@@ -57,6 +61,12 @@ export function useVoiceCall(
       chunksRef.current = opened.chunks;
       recorderRef.current = opened.recorder;
       setPhase("listening");
+      if (call.prefsRef.current.hands === "auto") {
+        stopWatch.current?.();
+        stopWatch.current = watchTalkEnd(opened.stream, () => {
+          if (alive.current && phaseRef.current === "listening") void finishCallTalk(turnApi());
+        });
+      }
     } catch {
       call.setError("Microphone permission is off. Allow it, then press Call again.");
       setPhase("off");
@@ -102,13 +112,15 @@ export function useVoiceCall(
     voices: call.voices,
     supported: call.supported,
     ready: call.ready,
+    hear: call.hear,
+    speak: call.speak,
     setPrefs: call.setPrefs,
     preview: call.preview,
     replyTo: (text: string) => replyOnCall(text, turnApi()),
     hold: () => {
       haltSpeech();
       dropMic();
-      if (alive.current) setPhase("working");
+      if (alive.current) setPhase("thinking");
     },
     start: () => {
       if (!canUseLocalVoice()) return call.setError("Call needs a microphone in this browser.");
@@ -127,7 +139,7 @@ export function useVoiceCall(
     },
     end,
     toggleTalk: () => {
-      if (!activeRef.current || phaseRef.current === "working") return;
+      if (!activeRef.current || phaseRef.current === "hearing" || phaseRef.current === "thinking") return;
       if (phaseRef.current === "listening") void finishCallTalk(turnApi());
       else {
         haltSpeech();

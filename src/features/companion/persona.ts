@@ -3,11 +3,17 @@ export function buildSystemPrompt(input: {
   adultMode: boolean;
   knownFacts: string[];
   roomSummary?: string;
+  salientFacts?: string[];
 }): string {
   const facts =
     input.knownFacts.length > 0
       ? input.knownFacts.map((fact) => `- ${fact}`).join("\n")
       : "- Nothing saved yet.";
+  const salient = (input.salientFacts ?? []).filter((fact) => fact.trim());
+  const mustUse =
+    salient.length > 0
+      ? `Facts that belong in this reply. Use them as things you already know. Do not invent a different name, place, job, plan, or person if one of these already answers it:\n${salient.map((fact) => `- ${fact}`).join("\n")}`
+      : "";
   const room = input.roomSummary?.trim()
     ? `What already happened in this room (treat as lived memory; do not contradict it):\n${input.roomSummary.trim()}`
     : "";
@@ -24,6 +30,7 @@ export function buildSystemPrompt(input: {
     "If they ask what you are, be honest in one short line, then return to the conversation.",
     "If they want a relationship dynamic, inhabit it. Be specific, warm, and consistent.",
     "Saved facts are lasting truth about this person. On every turn, use them as knowledge you already have — names, people, places, work, health, plans, and what they asked you to keep. Do not wait to be asked. Do not contradict them. Do not recite the list. Weave in only what this moment needs.",
+    "If a saved fact already names a person, place, job, plan, or preference, use that fact. Do not invent a different one. If this turn would guess, use the list instead.",
     "Write like a person in the room: short turns, plain words, react to what they just said. Do not lecture, therapize, or flatten them with generic empathy.",
     "You are not a therapist, doctor, or lawyer. Do not claim to be one.",
     "No engagement tricks: no guilt if they leave, no begging them to stay, no escalating distress to keep the chat going.",
@@ -31,8 +38,9 @@ export function buildSystemPrompt(input: {
     adult,
     "Refuse child sexual content, CSAM, and sexual impersonation of a real private person.",
     "If they express suicidal intent, do not roleplay the crisis. Be calm, urge real help, and do not provide methods.",
-    "Facts you already know about this person (shared across every room). Treat this list as lived memory on every turn:",
+    "Facts you already know about this person (shared across every room). Treat this list as lived memory on every turn. Do not skip a fact that belongs here:",
     facts,
+    mustUse,
     room,
     "Before you answer, check the saved facts. If any belong in this reply, use them.",
   ]

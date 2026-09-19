@@ -6,8 +6,8 @@ type AgeGateProps = {
 
 export function AgeGate({ onConfirm }: AgeGateProps) {
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-lg flex-col justify-center gap-8 px-4 py-16 sm:px-6">
-      <p className="text-xs tracking-[0.22em] text-[var(--haven-brass)] uppercase">
+    <main className="haven-room-enter mx-auto flex min-h-full w-full max-w-lg flex-col justify-center gap-8 px-4 py-16 sm:px-6">
+      <p className="haven-kicker text-xs tracking-[0.22em] text-[var(--haven-brass)] uppercase">
         Haven
       </p>
       <div className="space-y-4">

@@ -22,8 +22,8 @@ export function Setup({ defaultName, onStart }: SetupProps) {
   ];
 
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-lg flex-col justify-center gap-8 px-4 py-16 sm:px-6">
-      <p className="text-xs tracking-[0.22em] text-[var(--haven-brass)] uppercase">
+    <main className="haven-room-enter mx-auto flex min-h-full w-full max-w-lg flex-col justify-center gap-8 px-4 py-16 sm:px-6">
+      <p className="haven-kicker text-xs tracking-[0.22em] text-[var(--haven-brass)] uppercase">
         Setup {step + 1} of 4
       </p>
       <h1 className="font-serif text-4xl leading-tight text-[var(--haven-ink)]">{titles[step]}</h1>
@@ -31,6 +31,7 @@ export function Setup({ defaultName, onStart }: SetupProps) {
         The local model on this computer stays the same. These answers change
         how it talks to you. Skip any line you do not want to share.
       </p>
+      <div key={step} className="haven-step-enter space-y-5">
       {step === 0 ? (
         <label className="space-y-2 text-sm text-[var(--haven-mute)]">
           Companion name
@@ -44,6 +45,7 @@ export function Setup({ defaultName, onStart }: SetupProps) {
       {step === 1 ? <FitPersonalityFields fit={fit} onChange={setFit} /> : null}
       {step === 2 ? <FitAboutFields fit={fit} onChange={setFit} /> : null}
       {step === 3 ? <FitStyleFields fit={fit} onChange={setFit} /> : null}
+      </div>
       <div className="flex flex-wrap gap-4">
         {step > 0 ? (
           <button

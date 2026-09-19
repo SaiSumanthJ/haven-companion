@@ -5,8 +5,12 @@ import type { AttachBundle } from "@/features/attach/types";
 import { AttachBar } from "@/features/chat/AttachBar";
 import { AttachButton } from "@/features/chat/AttachButton";
 import { CallButton } from "@/features/chat/CallButton";
+import { ComposerStatus } from "@/features/chat/ComposerStatus";
+import { TalkShift } from "@/features/chat/TalkShift";
 import { VoiceButton } from "@/features/chat/VoiceButton";
+import { useTalkFlash } from "@/features/chat/useTalkFlash";
 import { useVoiceToText } from "@/features/voice/useVoiceToText";
+import type { WhisperProgress } from "@/features/voice/speechStatus";
 import { MAX_ATTACH_FILES } from "@/ports/files/kinds";
 import { useState } from "react";
 
@@ -16,6 +20,8 @@ type ComposerProps = {
   callActive: boolean;
   callSupported: boolean;
   callReady: boolean;
+  hear: WhisperProgress;
+  speak: WhisperProgress;
   onChange: (value: string) => void;
   onSend: (attach?: AttachBundle) => void;
   onCall: () => void;
@@ -27,6 +33,8 @@ export function Composer({
   callActive,
   callSupported,
   callReady,
+  hear,
+  speak,
   onChange,
   onSend,
   onCall,
@@ -55,17 +63,12 @@ export function Composer({
     }
   }
 
-  const status =
-    error ||
-    voice.error ||
-    (voice.busy
-      ? "Turning speech into text…"
-      : voice.listening
-        ? "Listening. Press Stop when you are done."
-        : "");
+  const mode = callActive ? "call" : voice.listening ? "hear" : "type";
+  const flash = useTalkFlash(mode);
 
   return (
     <div className="space-y-2">
+      <TalkShift mode={mode} flash={flash} />
       <form
         className="flex flex-col gap-2"
         onSubmit={(event) => {
@@ -81,19 +84,21 @@ export function Composer({
           onRemove={(index) => setFiles((current) => current.filter((_, item) => item !== index))}
         />
         <div className="flex items-end gap-3">
-          <textarea
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                void send();
-              }
-            }}
-            rows={3}
-            placeholder="Write what you want to say"
-            className="min-h-[6.5rem] flex-1 resize-none rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-4 py-3 text-sm leading-6 text-[var(--haven-ink)] outline-none"
-          />
+          <div className={`relative min-h-[6.5rem] flex-1 ${flash && mode === "type" ? "haven-write is-shift" : ""}`}>
+            <textarea
+              value={value}
+              onChange={(event) => onChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void send();
+                }
+              }}
+              rows={3}
+              placeholder="Write what you want to say"
+              className="h-full min-h-[6.5rem] w-full resize-none rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-4 py-3 text-sm leading-6 text-[var(--haven-ink)] outline-none"
+            />
+          </div>
           <div className="grid w-[13.5rem] shrink-0 grid-cols-2 gap-2">
             <button
               type="submit"
@@ -126,17 +131,15 @@ export function Composer({
           </div>
         </div>
       </form>
-      {status ? (
-        <p
-          className={`text-xs leading-5 ${
-            error || voice.error
-              ? "text-[var(--haven-crisis-edge)]"
-              : "text-[var(--haven-mute)]"
-          }`}
-        >
-          {status}
-        </p>
-      ) : null}
+      <ComposerStatus
+        error={error || voice.error}
+        listening={voice.listening}
+        hearingBusy={voice.busy}
+        hear={voice.model.status !== "idle" ? voice.model : hear}
+        speak={speak}
+        callActive={callActive}
+        callReady={callReady}
+      />
     </div>
   );
 }

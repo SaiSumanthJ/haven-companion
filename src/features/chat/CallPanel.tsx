@@ -1,5 +1,6 @@
 import { CallSettings } from "@/features/chat/CallSettings";
 import { HintLine, HoverHint } from "@/features/chat/HoverHint";
+import { callPhaseLine } from "@/features/chat/honestStatus";
 import type { CallPrefs, VoiceChoice } from "@/features/voice/callSpeech";
 import type { CallPhase } from "@/features/voice/useVoiceCall";
 
@@ -15,13 +16,6 @@ type CallPanelProps = {
   offerTalk: boolean;
 };
 
-function phaseLine(name: string, phase: CallPhase): string {
-  if (phase === "listening") return "Listening.";
-  if (phase === "working") return `${name} is catching your words.`;
-  if (phase === "speaking") return `${name} is speaking.`;
-  return "Press Talk when you are ready to speak again.";
-}
-
 export function CallPanel({
   companionName,
   phase,
@@ -34,10 +28,11 @@ export function CallPanel({
   offerTalk,
 }: CallPanelProps) {
   const talkLabel = phase === "listening" ? "Done talking" : "Talk";
-  const showTalk = phase === "listening" || offerTalk;
+  const busy = phase === "hearing" || phase === "thinking" || phase === "speaking";
+  const showTalk = phase === "listening" || (prefs.hands === "manual" && offerTalk);
 
   return (
-    <div className="relative z-10 mb-4 space-y-4 rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-4 py-4">
+    <div className="haven-call-enter relative z-10 mb-4 space-y-4 rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-4 py-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs tracking-[0.18em] text-[var(--haven-brass)] uppercase">
@@ -47,7 +42,7 @@ export function CallPanel({
             In a call with {companionName}
           </p>
           <p className="mt-2 text-sm leading-6 text-[var(--haven-mute)]">
-            {phaseLine(companionName, phase)}
+            {callPhaseLine(companionName, phase, prefs)}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -55,14 +50,21 @@ export function CallPanel({
             <button
               type="button"
               onClick={onTalk}
-              disabled={phase === "working" || phase === "speaking"}
+              disabled={busy}
               className="h-11 rounded-md bg-[var(--haven-brass)] px-4 text-sm font-medium text-[var(--haven-night)] disabled:opacity-40"
             >
               {talkLabel}
             </button>
           ) : null}
           <HoverHint label="How this call works">
-            <HintLine title="Talk" body="Call starts the first take. After they answer, press Talk, then Done talking." />
+            <HintLine
+              title="Talk"
+              body={
+                prefs.hands === "auto"
+                  ? "Call starts listening. After you pause, the room turns speech into words and answers. You can still press Done talking."
+                  : "Call starts the first take. After they answer, press Talk, then Done talking."
+              }
+            />
             <HintLine title="End" body="Use End in the grid beside Voice. That stops the voice. The written reply stays." />
             <HintLine title="Hearing" body="Whisper on this computer turns your speech into words." />
             <HintLine title="Speaking" body="Kokoro speaks here. Headphones help so the mic does not catch the speakers." />

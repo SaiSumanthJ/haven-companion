@@ -11,6 +11,7 @@ export async function requestReply(
     companionName: string;
     adultMode: boolean;
     knownFacts: string[];
+    salientFacts?: string[];
     roomSummary?: string;
     userFit?: UserFit;
     messages: Array<{ role: "user" | "assistant"; content: string; images?: string[] }>;

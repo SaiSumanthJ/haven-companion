@@ -37,6 +37,15 @@ export function CallSettings({ prefs, voices, onChange, onPreview }: CallSetting
         onChange={(rate) => onChange({ ...prefs, rate })}
       />
       <ChoiceRow
+        label="How you talk"
+        value={prefs.hands}
+        options={[
+          { id: "manual", label: "Press Talk, then Done talking" },
+          { id: "auto", label: "Automatic — I take the pause" },
+        ]}
+        onChange={(hands) => onChange({ ...prefs, hands })}
+      />
+      <ChoiceRow
         label="After they finish speaking"
         value={prefs.listenAgain ? "again" : "wait"}
         options={[

@@ -7,7 +7,7 @@ export function AttachChips({ notes }: { notes?: AttachmentNote[] }) {
       {notes.map((note) => (
         <li
           key={`${note.kind}-${note.name}`}
-          className="rounded-md border border-[var(--haven-edge)] px-2 py-1 text-xs text-[var(--haven-mute)]"
+          className="haven-chip rounded-md border border-[var(--haven-edge)] px-2 py-1 text-xs text-[var(--haven-mute)]"
         >
           {note.name}
         </li>

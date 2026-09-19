@@ -1,9 +1,12 @@
 export type CallRate = "slow" | "natural" | "fast";
 
+export type CallHands = "auto" | "manual";
+
 export type CallPrefs = {
   voiceURI: string;
   rate: CallRate;
   listenAgain: boolean;
+  hands: CallHands;
 };
 
 export type VoiceChoice = {
@@ -34,6 +37,7 @@ export const emptyCallPrefs = (): CallPrefs => ({
   voiceURI: "af_heart",
   rate: "natural",
   listenAgain: true,
+  hands: "manual",
 });
 
 export function rateValue(rate: CallRate): number {
@@ -100,5 +104,6 @@ export function parseCallPrefs(raw: unknown): CallPrefs {
     voiceURI: typeof src.voiceURI === "string" ? src.voiceURI : "af_heart",
     rate: rate === "slow" || rate === "fast" ? rate : "natural",
     listenAgain: src.listenAgain !== false,
+    hands: src.hands === "auto" ? "auto" : "manual",
   };
 }

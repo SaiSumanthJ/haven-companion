@@ -17,7 +17,7 @@ export function AttachBar({ files, busy, error, disabled, onRemove }: AttachBarP
           {files.map((file, index) => (
             <li
               key={`${file.name}-${index}`}
-              className="flex items-center gap-2 rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-2 py-1 text-xs text-[var(--haven-ink)]"
+              className="haven-chip flex items-center gap-2 rounded-md border border-[var(--haven-edge)] bg-[var(--haven-panel)] px-2 py-1 text-xs text-[var(--haven-ink)]"
             >
               <span className="max-w-[12rem] truncate">{file.name}</span>
               <button
@@ -33,7 +33,7 @@ export function AttachBar({ files, busy, error, disabled, onRemove }: AttachBarP
         </ul>
       ) : null}
       {busy ? (
-        <p className="text-xs leading-5 text-[var(--haven-mute)]">Reading the files…</p>
+        <p className="haven-wait text-xs leading-5 text-[var(--haven-mute)]">Reading the files…</p>
       ) : null}
       {error ? (
         <p className="text-xs leading-5 text-[var(--haven-crisis-edge)]">{error}</p>

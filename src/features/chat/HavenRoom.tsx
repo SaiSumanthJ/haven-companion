@@ -25,7 +25,7 @@ export function HavenRoom({ session }: HavenRoomProps) {
         : null;
 
   return (
-    <main className="mx-auto flex h-[100dvh] w-full max-w-3xl flex-col gap-3 overflow-hidden px-4 pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6">
+    <main className="haven-room-enter mx-auto flex h-[100dvh] w-full max-w-3xl flex-col gap-3 overflow-hidden px-4 pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pt-6">
       <header className="flex shrink-0 items-center gap-4">
         <RoomSidebar session={session} />
         <div className="min-w-0 flex-1">
@@ -58,7 +58,10 @@ export function HavenRoom({ session }: HavenRoomProps) {
         pastSuggestions={session.pastSuggestions}
         onAddSuggestion={session.addSuggestion}
         onRestartPrompt={session.restartFrom}
-        pendingLabel={waking ? "Waking the local model…" : "Answering…"}
+        knownFacts={state.knownFacts}
+        pendingLabel={
+          waking ? "Waking the local model…" : "Answering — waiting for the local model…"
+        }
         careNote={careNote}
       />
       <div className="shrink-0">
@@ -81,6 +84,8 @@ export function HavenRoom({ session }: HavenRoomProps) {
           callActive={call.active}
           callSupported={call.supported}
           callReady={call.ready}
+          hear={call.hear}
+          speak={call.speak}
           onChange={session.setDraft}
           onSend={(attach) => {
             if (call.active) {

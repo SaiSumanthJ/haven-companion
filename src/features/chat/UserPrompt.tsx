@@ -2,6 +2,7 @@
 
 import { AttachChips } from "@/features/chat/AttachChips";
 import { CopyLine } from "@/features/chat/CopyLine";
+import { MemoryUsed } from "@/features/chat/MemoryUsed";
 import { TurnHead } from "@/features/chat/TurnHead";
 import { quietBtn, quietBtnBrass } from "@/features/chat/quietBtn";
 import type { AttachmentNote } from "@/features/memory/types";
@@ -10,11 +11,12 @@ import { useState } from "react";
 type UserPromptProps = {
   content: string;
   attachments?: AttachmentNote[];
+  usedFacts?: string[];
   canEdit: boolean;
   onRestart: (text: string) => void;
 };
 
-export function UserPrompt({ content, attachments, canEdit, onRestart }: UserPromptProps) {
+export function UserPrompt({ content, attachments, usedFacts, canEdit, onRestart }: UserPromptProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(content);
 
@@ -22,6 +24,7 @@ export function UserPrompt({ content, attachments, canEdit, onRestart }: UserPro
     return (
       <div className="space-y-2">
         <TurnHead label="You" tone="you">
+          {usedFacts?.length ? <MemoryUsed facts={usedFacts} /> : null}
           {canEdit ? (
             <button
               type="button"
