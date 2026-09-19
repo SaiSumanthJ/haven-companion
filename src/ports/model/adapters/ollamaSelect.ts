@@ -128,3 +128,14 @@ export function pickFastCallModel(
     return a.size - b.size;
   })[0] ?? null;
 }
+
+export function pickCallModel(
+  models: ListedOllamaModel[],
+  totalMemoryBytes: number,
+  wanted?: string | null,
+): ListedOllamaModel | null {
+  return (
+    pickFastCallModel(models, totalMemoryBytes, wanted) ??
+    pickComfortableModel(models, totalMemoryBytes, wanted)
+  );
+}

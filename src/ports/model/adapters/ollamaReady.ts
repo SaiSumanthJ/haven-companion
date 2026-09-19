@@ -4,8 +4,8 @@ import { readLocalPrefs } from "@/ports/localPrefs";
 import {
   envWantedCallModel,
   envWantedModel,
+  pickCallModel,
   pickComfortableModel,
-  pickFastCallModel,
   systemMemoryBytes,
   type ListedOllamaModel,
 } from "./ollamaSelect";
@@ -50,13 +50,13 @@ export async function resolveOllamaCallModel(): Promise<CompanionModel | null> {
   try {
     const installed = await listInstalled();
     const ram = systemMemoryBytes();
-    const fast = pickFastCallModel(
+    const picked = pickCallModel(
       installed,
       ram,
       readLocalPrefs().callModel ?? envWantedCallModel(),
     );
-    if (fast) return createOllamaModel(fast.name);
-    return resolveOllamaModel();
+    if (picked) return createOllamaModel(picked.name);
+    return null;
   } catch {
     return null;
   }

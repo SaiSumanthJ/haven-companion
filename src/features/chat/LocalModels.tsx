@@ -64,7 +64,9 @@ export function LocalModels({ onChanged }: LocalModelsProps) {
   return (
     <div className="space-y-4 text-sm">
       <p className="text-xs leading-5 text-[var(--haven-mute)]">
-        These lists are what is already on this computer. Speaking voice still lives under Voice call.
+        These lists are what is already on this computer. Text to text and Call keep their own
+        picks — changing one does not change the other. Speaking voice still lives under Voice
+        call.
       </p>
       {catalog.using ? (
         <p className="text-xs leading-5 text-[var(--haven-brass)]">
